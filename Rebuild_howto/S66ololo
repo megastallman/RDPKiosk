@@ -1,0 +1,53 @@
+#!/bin/sh
+#
+# Start the OLOLO....
+#
+
+case "$1" in
+  start)
+   	echo "Starting OLOLO..."
+	udhcpc
+	rm -rf /usr/share/fluxbox/styles/bloe
+	ln -sT /usr/share/fluxbox/styles/BlueNight /usr/share/fluxbox/styles/bloe
+	
+	touch /root/.xinitrc
+	
+	if [ -z $xrandr ]; then echo " "; else 
+	echo "xrandr $xrandr" >> /root/.xinitrc
+	fi	
+	
+	echo "xeyes -geometry +500 &" >> /root/.xinitrc
+	echo "fluxbox" >> /root/.xinitrc
+	mkdir /root/.fluxbox
+	su root -c fluxbox-generate_menu
+	
+	if [ -z $rdesktop ]; then echo " "; else 
+	sed -i s/"xeyes -geometry +500"/"rdesktop -f $rdesktop"/g /root/.xinitrc
+	echo "session.screen0.toolbar.visible: false" >> /root/.fluxbox/init
+	fi
+
+	if [ -z $xfreerdp ]; then echo " "; else 
+	sed -i s/"xeyes -geometry +500"/"xfreerdp -f $xfreerdp"/g /root/.xinitrc
+	echo "session.screen0.toolbar.visible: false" >> /root/.fluxbox/init
+	fi
+	
+	if [ $startx == 1 ]
+	then
+	su root -c startx 
+	fi
+	;;
+  stop)
+	echo -n "Stopping OLOLO..."
+	
+	;;
+  restart|reload)
+	"$0" stop
+	"$0" start
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+esac
+
+exit $?
+
